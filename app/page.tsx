@@ -1,3 +1,4 @@
+import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 import ChatFab from "@/components/ChatFab";
 import WeatherWidget from "@/components/WeatherWidget";
@@ -16,9 +17,9 @@ export default function Home() {
         <section>
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-['Plus_Jakarta_Sans'] text-2xl text-[#154212] font-bold">Seasonal Insights</h2>
-            <button className="text-[#755750] font-medium hover:underline text-sm flex items-center gap-1">
+            <Link href="/marketplace" className="text-[#755750] font-medium hover:underline text-sm flex items-center gap-1">
               More <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </button>
+            </Link>
           </div>
           <div className="relative overflow-hidden rounded-[1.5rem] h-48">
             <img
@@ -43,9 +44,9 @@ export default function Home() {
             <p className="font-['Plus_Jakarta_Sans'] font-bold text-xl leading-tight mb-3">
               Monsoon crop protection<br />bundles now available
             </p>
-            <button className="bg-white text-[#154212] font-bold text-sm px-4 py-2 rounded-full hover:bg-[#f3f4ed] transition-colors">
+            <Link href="/marketplace" className="bg-white text-[#154212] font-bold text-sm px-4 py-2 rounded-full hover:bg-[#f3f4ed] transition-colors">
               Shop Now
-            </button>
+            </Link>
           </div>
           <span className="material-symbols-outlined absolute -right-4 -bottom-4 opacity-10" style={{ fontSize: "9rem" }}>
             eco

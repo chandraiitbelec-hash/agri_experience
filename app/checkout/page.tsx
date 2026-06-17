@@ -1,181 +1,159 @@
+"use client";
+import { useState } from "react";
 import Link from "next/link";
+import BottomNav from "@/components/BottomNav";
+import { useCart } from "@/context/CartContext";
 
-const cartItems = [
-  {
-    id: "elan-npk",
-    name: "Elan NPK Complex",
-    qty: 2,
-    price: "₹1,450.00",
-    img: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&q=80",
-  },
-  {
-    id: "elan-seeds",
-    name: "Hybrid Tomato Seeds",
-    qty: 5,
-    price: "₹499.00",
-    img: "https://images.unsplash.com/photo-1592921870789-04563d55041c?w=200&q=80",
-  },
-];
+const DELIVERY_FEE = 49;
+const GST_RATE = 0.18;
 
 export default function CheckoutPage() {
+  const { items, remove, increment, decrement, total } = useCart();
+  const [payment, setPayment] = useState<"upi" | "cod" | "bank">("upi");
+  const [paid, setPaid] = useState(false);
+
+  const gst = total * GST_RATE;
+  const grandTotal = total + gst + (items.length > 0 ? DELIVERY_FEE : 0);
+
+  if (paid) {
+    return (
+      <div className="bg-[#f9faf2] min-h-screen flex flex-col items-center justify-center px-8 text-center gap-6">
+        <div className="w-24 h-24 rounded-full bg-[#bcf0ae] flex items-center justify-center mb-2">
+          <span className="material-symbols-outlined text-5xl text-[#154212]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+        </div>
+        <h1 className="font-['Plus_Jakarta_Sans'] font-extrabold text-3xl text-[#154212]">Order Placed!</h1>
+        <p className="text-[#42493e]">Your order has been confirmed and will be delivered in 3–5 business days.</p>
+        <div className="bg-white rounded-[1.5rem] p-5 w-full shadow-sm text-left">
+          <p className="text-xs uppercase tracking-widest text-[#42493e] mb-1">Order Total</p>
+          <p className="font-['Plus_Jakarta_Sans'] font-extrabold text-2xl text-[#154212]">₹{grandTotal.toFixed(2)}</p>
+          <p className="text-sm text-[#42493e] mt-1">via {payment === "upi" ? "UPI" : payment === "cod" ? "Cash on Delivery" : "Bank Transfer"}</p>
+        </div>
+        <Link href="/marketplace" className="bg-[#154212] text-white font-bold px-8 py-4 rounded-full hover:bg-[#2d5a27] transition-colors">
+          Continue Shopping
+        </Link>
+        <Link href="/profile" className="text-[#154212] font-medium hover:underline">View Orders</Link>
+        <BottomNav />
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-[#f9faf2] font-['Work_Sans'] text-[#191c18] min-h-screen pb-32">
+    <div className="bg-[#f9faf2] font-['Work_Sans'] text-[#191c18]">
       <header className="sticky top-0 w-full z-[50] flex items-center justify-between px-6 h-16 bg-[#f9faf2]">
         <div className="flex items-center gap-4">
-          <Link
-            href="/marketplace"
-            className="p-2 text-[#154212] hover:bg-[#e2e3dc] transition-colors active:scale-90"
-          >
+          <Link href="/marketplace" className="p-2 text-[#154212] hover:bg-[#e2e3dc] transition-colors active:scale-90 rounded-full">
             <span className="material-symbols-outlined">arrow_back</span>
           </Link>
-          <h1 className="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-[#154212]">
-            Your Basket
-          </h1>
+          <h1 className="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-[#154212]">Your Basket</h1>
         </div>
-        <button className="p-2 text-[#154212] hover:bg-[#e2e3dc] transition-colors active:scale-90">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
+        {items.length > 0 && (
+          <span className="bg-[#154212] text-white text-xs font-bold px-3 py-1 rounded-full">
+            {items.reduce((s, i) => s + i.qty, 0)} items
+          </span>
+        )}
       </header>
 
-      <main className="pt-24 px-6 max-w-5xl mx-auto space-y-10">
-        <section className="flex flex-col gap-6">
-          {/* Cart Items */}
-          <div className="space-y-6">
-            <div className="flex flex-col gap-4">
-              <h2 className="text-[10px] uppercase tracking-wider text-[#755750] font-semibold">
-                Items in Cart
-              </h2>
-
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white p-6 rounded-3xl flex items-center gap-6 shadow-[0_12px_32px_rgba(25,28,24,0.02)] border border-[#c2c9bb]/10"
-                >
-                  <div className="w-24 h-24 rounded-2xl bg-[#edefe7] overflow-hidden flex-shrink-0">
-                    <img
-                      src={item.img}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
+      <main className="pt-6 pb-32 px-6 space-y-6">
+        {items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+            <span className="material-symbols-outlined text-5xl text-[#c2c9bb]">shopping_cart</span>
+            <p className="font-['Plus_Jakarta_Sans'] font-bold text-xl text-[#154212]">Your cart is empty</p>
+            <p className="text-[#42493e] text-sm">Add products from the marketplace to get started.</p>
+            <Link href="/marketplace" className="bg-[#154212] text-white font-bold px-6 py-3 rounded-full hover:bg-[#2d5a27] transition-colors mt-2">
+              Go to Marketplace
+            </Link>
+          </div>
+        ) : (
+          <>
+            {/* Cart Items */}
+            <section className="space-y-4">
+              {items.map((item) => (
+                <div key={item.id} className="bg-white rounded-[1.5rem] p-4 flex gap-4 shadow-[0_4px_12px_rgba(25,28,24,0.04)]">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-[#f3f4ed]">
+                    <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex-grow">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-lg font-bold text-[#154212]">{item.name}</h3>
-                        <p className="text-sm text-[#755750] font-medium">Qty: {item.qty}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-['Plus_Jakarta_Sans'] font-bold text-[#191c18] leading-tight">{item.name}</p>
+                    <p className="font-['Plus_Jakarta_Sans'] font-bold text-[#154212] mt-1">{item.price}</p>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-2 bg-[#f3f4ed] rounded-full px-1 py-1">
+                        <button onClick={() => decrement(item.id)} className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#154212] font-bold hover:bg-[#e2e3dc] transition-colors active:scale-90">
+                          <span className="material-symbols-outlined text-sm">remove</span>
+                        </button>
+                        <span className="font-bold w-5 text-center text-sm">{item.qty}</span>
+                        <button onClick={() => increment(item.id)} className="w-7 h-7 rounded-full bg-[#154212] flex items-center justify-center text-white hover:bg-[#2d5a27] transition-colors active:scale-90">
+                          <span className="material-symbols-outlined text-sm">add</span>
+                        </button>
                       </div>
-                      <p className="text-lg font-bold text-[#191c18]">{item.price}</p>
-                    </div>
-                    <div className="mt-4 flex gap-4">
-                      <button className="text-xs font-semibold uppercase tracking-widest text-[#154212]/60 hover:text-[#154212] transition-colors">
+                      <button onClick={() => remove(item.id)} className="text-[#ba1a1a] text-sm font-medium hover:underline flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">delete</span>
                         Remove
-                      </button>
-                      <button className="text-xs font-semibold uppercase tracking-widest text-[#154212]/60 hover:text-[#154212] transition-colors">
-                        Save for Later
                       </button>
                     </div>
                   </div>
                 </div>
               ))}
-            </div>
+            </section>
 
-            {/* Delivery Address */}
-            <div className="bg-[#f3f4ed] p-8 rounded-3xl space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-[10px] uppercase tracking-wider text-[#755750] font-semibold">
-                  Delivery Address
-                </h2>
-                <button className="text-[#154212] text-sm font-bold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">edit</span> Change
-                </button>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#154212]/10 flex items-center justify-center flex-shrink-0">
+            {/* Delivery */}
+            <div className="bg-white rounded-[1.5rem] p-5 shadow-[0_4px_12px_rgba(25,28,24,0.04)]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[#154212]">location_on</span>
+                  <div>
+                    <p className="font-bold text-sm">Delivery Address</p>
+                    <p className="text-xs text-[#42493e]">Pedakurapadu, Guntur, AP — 522 601</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-[#191c18]">Green Valley Farm, Plot #44</p>
-                  <p className="text-sm text-[#42493e] leading-relaxed">
-                    Near Ancient Banyan Tree, Rural Road 12,
-                    <br />
-                    Kurnool District, AP - 518001
-                  </p>
-                </div>
+                <button className="text-[#154212] text-sm font-bold hover:underline">Change</button>
               </div>
             </div>
-          </div>
 
-          {/* Payment & Summary */}
-          <div className="space-y-6">
-            {/* Payment Methods */}
-            <div className="bg-white p-8 rounded-3xl shadow-[0_12px_32px_rgba(25,28,24,0.04)] space-y-6">
-              <h2 className="text-[10px] uppercase tracking-wider text-[#755750] font-semibold">
-                Payment Method
-              </h2>
-              <div className="space-y-3">
-                {[
-                  { id: "upi", label: "UPI", icon: "account_balance_wallet", checked: true },
-                  { id: "cod", label: "Cash on Delivery", icon: "payments", checked: false },
-                  { id: "bank", label: "Bank Transfer", icon: "account_balance", checked: false },
-                ].map((m) => (
-                  <label
-                    key={m.id}
-                    className={`flex items-center p-4 rounded-2xl cursor-pointer transition-all group ${
-                      m.checked
-                        ? "border border-[#154212]/20 bg-[#f9faf2]"
-                        : "bg-[#f3f4ed] hover:bg-[#e2e3dc]"
-                    }`}
-                  >
-                    <input
-                      defaultChecked={m.checked}
-                      className="w-5 h-5 text-[#154212] border-[#c2c9bb] focus:ring-[#154212]"
-                      name="payment"
-                      type="radio"
-                    />
-                    <span className="ml-3 font-semibold text-[#191c18] flex-grow">{m.label}</span>
-                    <span className="material-symbols-outlined text-[#154212]">{m.icon}</span>
-                  </label>
-                ))}
-              </div>
+            {/* Payment */}
+            <div className="bg-white rounded-[1.5rem] p-5 shadow-[0_4px_12px_rgba(25,28,24,0.04)] space-y-3">
+              <p className="font-['Plus_Jakarta_Sans'] font-bold text-lg text-[#191c18] mb-4">Payment Method</p>
+              {([
+                { id: "upi",  icon: "payment",         label: "UPI / GPay / PhonePe" },
+                { id: "cod",  icon: "local_shipping",  label: "Cash on Delivery" },
+                { id: "bank", icon: "account_balance",  label: "Net Banking" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setPayment(opt.id)}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
+                    payment === opt.id ? "border-[#154212] bg-[#154212]/5" : "border-[#e2e3dc] hover:border-[#c2c9bb]"
+                  }`}
+                >
+                  <span className={`material-symbols-outlined ${payment === opt.id ? "text-[#154212]" : "text-[#72796e]"}`}>{opt.icon}</span>
+                  <span className={`font-medium ${payment === opt.id ? "text-[#154212] font-bold" : "text-[#191c18]"}`}>{opt.label}</span>
+                  {payment === opt.id && <span className="material-symbols-outlined text-[#154212] ml-auto text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>radio_button_checked</span>}
+                </button>
+              ))}
             </div>
 
             {/* Order Summary */}
-            <div className="bg-[#154212] text-white p-8 rounded-3xl space-y-6">
-              <h2 className="text-[10px] uppercase tracking-wider text-white/60 font-semibold">
-                Order Summary
-              </h2>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="opacity-80">Subtotal</span>
-                  <span>₹1,949.00</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="opacity-80">Shipping</span>
-                  <span className="text-[#a1d494]">FREE</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="opacity-80">GST (5%)</span>
-                  <span>₹97.45</span>
-                </div>
-                <div className="pt-4 border-t border-white/10 flex justify-between items-end">
-                  <span className="text-lg font-bold">Total</span>
-                  <p className="font-['Plus_Jakarta_Sans'] text-2xl font-black tracking-tight">
-                    ₹2,046.45
-                  </p>
-                </div>
+            <div className="bg-white rounded-[1.5rem] p-5 shadow-[0_4px_12px_rgba(25,28,24,0.04)] space-y-3">
+              <p className="font-['Plus_Jakarta_Sans'] font-bold text-lg text-[#191c18] mb-2">Order Summary</p>
+              <div className="flex justify-between text-sm"><span className="text-[#42493e]">Subtotal</span><span className="font-medium">₹{total.toFixed(2)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#42493e]">GST (18%)</span><span className="font-medium">₹{gst.toFixed(2)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-[#42493e]">Delivery</span><span className="font-medium text-[#154212]">₹{DELIVERY_FEE}</span></div>
+              <div className="border-t border-[#e2e3dc] pt-3 flex justify-between">
+                <span className="font-bold text-[#191c18]">Total</span>
+                <span className="font-['Plus_Jakarta_Sans'] font-extrabold text-xl text-[#154212]">₹{grandTotal.toFixed(2)}</span>
               </div>
-              <button className="w-full py-5 bg-white text-[#154212] rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all hover:bg-[#f3f4ed] flex items-center justify-center gap-2">
-                Pay Now
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
             </div>
-          </div>
-        </section>
+
+            <button
+              onClick={() => setPaid(true)}
+              className="w-full bg-[#154212] text-white font-['Plus_Jakarta_Sans'] font-bold text-lg py-5 rounded-[1.5rem] hover:bg-[#2d5a27] active:scale-[0.98] transition-all shadow-lg"
+            >
+              {payment === "cod" ? "Confirm Order" : `Pay ₹${grandTotal.toFixed(2)}`}
+            </button>
+          </>
+        )}
       </main>
 
-      <button className="fixed right-6 bottom-24 z-40 w-16 h-16 bg-[#755750] text-white rounded-3xl shadow-[0_12px_32px_rgba(25,28,24,0.3)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
-        <span className="material-symbols-outlined text-3xl">chat_bubble</span>
-      </button>
+      <BottomNav />
     </div>
   );
 }

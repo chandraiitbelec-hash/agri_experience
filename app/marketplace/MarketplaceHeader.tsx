@@ -2,9 +2,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import Drawer from "@/components/Drawer";
+import { useCart } from "@/context/CartContext";
 
 export default function MarketplaceHeader() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { count } = useCart();
 
   return (
     <>
@@ -19,7 +21,11 @@ export default function MarketplaceHeader() {
         <div className="flex items-center gap-2">
           <Link href="/checkout" className="relative p-2 rounded-full hover:bg-[#e2e3dc] transition-colors">
             <span className="material-symbols-outlined text-[#154212]">shopping_cart</span>
-            <span className="absolute top-1 right-1 w-4 h-4 bg-[#154212] text-white text-[9px] font-bold rounded-full flex items-center justify-center">2</span>
+            {count > 0 && (
+              <span className="absolute top-1 right-1 w-4 h-4 bg-[#154212] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                {count > 9 ? "9+" : count}
+              </span>
+            )}
           </Link>
           <button className="p-2 rounded-full hover:bg-[#e2e3dc] transition-colors">
             <span className="material-symbols-outlined text-[#154212]">notifications</span>

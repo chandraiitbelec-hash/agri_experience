@@ -1,6 +1,7 @@
 "use client";
 import BottomNav from "@/components/BottomNav";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Drawer from "@/components/Drawer";
 
 interface Message {
   role: "user" | "assistant";
@@ -28,9 +29,11 @@ const initialMessages: Message[] = [
 ];
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function sendMessage() {
     const text = input.trim();
@@ -76,26 +79,16 @@ export default function ChatPage() {
 
   return (
     <div className="bg-[#f9faf2] font-['Work_Sans'] text-[#191c18]">
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <header className="sticky top-0 w-full z-[50] flex items-center justify-between px-6 h-16 bg-[#f9faf2]">
         <div className="flex items-center gap-4">
-          <button className="material-symbols-outlined text-[#154212] hover:bg-[#e2e3dc] p-2 rounded-full transition-colors active:scale-90">
-            menu
+          <button onClick={() => setDrawerOpen(true)} className="p-2 text-[#154212] hover:bg-[#e2e3dc] rounded-full transition-colors active:scale-90">
+            <span className="material-symbols-outlined">menu</span>
           </button>
-          <h1 className="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-[#154212]">
-            Rythu Mitra
-          </h1>
+          <h1 className="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-[#154212]">Rythu Mitra</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="material-symbols-outlined text-[#154212] hover:bg-[#e2e3dc] p-2 rounded-full transition-colors active:scale-90">
-            notifications
-          </button>
-          <div className="w-8 h-8 rounded-full bg-[#2d5a27] overflow-hidden">
-            <img
-              className="w-full h-full object-cover"
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80"
-              alt="Farmer profile"
-            />
-          </div>
+        <div className="w-8 h-8 rounded-full bg-[#2d5a27] overflow-hidden">
+          <img className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="Farmer profile" />
         </div>
       </header>
 
@@ -184,7 +177,13 @@ export default function ChatPage() {
       {/* Input Bar */}
       <div className="sticky bottom-16 w-full z-40 px-4 pb-2">
         <div className="glass-panel p-3 rounded-2xl shadow-[0_12px_32px_rgba(25,28,24,0.08)] flex items-center gap-3">
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
+            if (e.target.files?.[0]) {
+              setInput("I've uploaded a photo of my crop. Can you diagnose what's wrong with it?");
+            }
+          }} />
           <button
+            onClick={() => fileInputRef.current?.click()}
             className="p-3 text-[#755750] hover:bg-[#e2e3dc] rounded-full transition-colors"
             title="Upload Photo"
           >

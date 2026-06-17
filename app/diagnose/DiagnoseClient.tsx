@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Drawer from "@/components/Drawer";
 
 const recentHistory = [
   { id: "tomato-blight", img: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=200&q=80", title: "Tomato Early Blight", badge: "High Risk", badgeBg: "bg-[#ffdad6] text-[#93000a]", location: "Greenhouse B", time: "2 hours ago" },
@@ -22,6 +23,7 @@ export default function DiagnoseClient() {
   const [preview, setPreview] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   async function handleFile(file: File) {
     if (!file.type.startsWith("image/")) return;
@@ -72,9 +74,10 @@ export default function DiagnoseClient() {
 
   return (
     <div className="bg-[#f9faf2] font-['Work_Sans'] text-[#191c18]">
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <nav className="sticky top-0 w-full z-[50] flex items-center justify-between px-6 h-16 bg-[#f9faf2]">
         <div className="flex items-center gap-4">
-          <button className="p-2 text-[#154212] hover:bg-[#e2e3dc] transition-colors rounded-full active:scale-90">
+          <button onClick={() => setDrawerOpen(true)} className="p-2 text-[#154212] hover:bg-[#e2e3dc] transition-colors rounded-full active:scale-90">
             <span className="material-symbols-outlined">menu</span>
           </button>
           <span className="font-['Plus_Jakarta_Sans'] font-black text-xl text-[#154212]">Rythu Mitra</span>

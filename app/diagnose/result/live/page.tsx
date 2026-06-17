@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
+import { useCart } from "@/context/CartContext";
 
 interface DiagnosisResult {
   disease: string;
@@ -26,6 +27,21 @@ const ALERT_COLORS: Record<string, { bg: string; text: string; ring: string }> =
 export default function LiveDiagnosisPage() {
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [missing, setMissing] = useState(false);
+  const [addedId, setAddedId] = useState<string | null>(null);
+  const { add } = useCart();
+
+  function handleAddToCart(p: { name: string; price: string; tag: string }) {
+    const id = p.name.toLowerCase().replace(/\s+/g, "-");
+    add({ id, name: p.name, price: p.price, img: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&q=80" });
+    setAddedId(id);
+    setTimeout(() => setAddedId(null), 1200);
+  }
+
+  function handleShare() {
+    if (navigator.share && result) {
+      navigator.share({ title: `Diagnosis: ${result.disease}`, text: result.description, url: window.location.href });
+    }
+  }
 
   useEffect(() => {
     const raw = sessionStorage.getItem("diagnosis_result");
@@ -69,7 +85,7 @@ export default function LiveDiagnosisPage() {
           <span className="material-symbols-outlined">arrow_back</span>
         </Link>
         <span className="font-['Plus_Jakarta_Sans'] font-bold text-lg text-[#154212]">Diagnosis Result</span>
-        <button className="p-2 text-[#154212] hover:bg-[#e2e3dc] rounded-full transition-colors">
+        <button onClick={handleShare} className="p-2 text-[#154212] hover:bg-[#e2e3dc] rounded-full transition-colors">
           <span className="material-symbols-outlined">share</span>
         </button>
       </nav>
@@ -174,8 +190,15 @@ export default function LiveDiagnosisPage() {
                 </div>
                 <div className="text-right">
                   <p className="font-['Plus_Jakarta_Sans'] font-bold text-lg text-[#154212]">{p.price}</p>
-                  <button className="mt-1 bg-[#154212] text-white text-xs px-3 py-1.5 rounded-full font-bold hover:bg-[#2d5a27] active:scale-95 transition-all">
-                    Add to Cart
+                  <button
+                    onClick={() => handleAddToCart(p)}
+                    className={`mt-1 text-xs px-3 py-1.5 rounded-full font-bold active:scale-95 transition-all ${
+                      addedId === p.name.toLowerCase().replace(/\s+/g, "-")
+                        ? "bg-[#bcf0ae] text-[#002201]"
+                        : "bg-[#154212] text-white hover:bg-[#2d5a27]"
+                    }`}
+                  >
+                    {addedId === p.name.toLowerCase().replace(/\s+/g, "-") ? "Added!" : "Add to Cart"}
                   </button>
                 </div>
               </div>

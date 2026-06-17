@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Work_Sans } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/context/CartContext";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -60,7 +61,7 @@ export default function RootLayout({
 
           {/* Mobile frame — fixed height, independent scroll, contains all positioned children */}
           <div className="relative w-full md:max-w-[390px] md:h-screen md:shadow-[0_0_80px_rgba(0,0,0,0.5)] md:overflow-y-auto md:overflow-x-hidden">
-            {children}
+            <CartProvider>{children}</CartProvider>
           </div>
 
           {/* Right decorative panel */}
