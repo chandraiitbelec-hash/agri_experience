@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/ChandraKanth/Documents/dev_experiments/**)",
+      "Bash(git -C /Users/ChandraKanth/Documents/dev_experiments show HEAD --name-only)"
+    ]
+  }
+}

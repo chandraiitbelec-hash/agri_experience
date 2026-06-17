@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Colors */
+  --color-primary: #154212;
+  --color-primary-container: #2d5a27;
+  --color-primary-fixed: #bcf0ae;
+  --color-primary-fixed-dim: #a1d494;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #9dd090;
+  --color-on-primary-fixed: #002201;
+  --color-on-primary-fixed-variant: #23501e;
+  --color-inverse-primary: #a1d494;
+
+  --color-secondary: #755750;
+  --color-secondary-container: #ffd7ce;
+  --color-secondary-fixed: #ffdad2;
+  --color-secondary-fixed-dim: #e5beb5;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #7a5b54;
+  --color-on-secondary-fixed: #2b1611;
+  --color-on-secondary-fixed-variant: #5c403a;
+
+  --color-tertiary: #003c60;
+  --color-tertiary-container: #005484;
+  --color-tertiary-fixed: #cee5ff;
+  --color-tertiary-fixed-dim: #96ccff;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #8dc8ff;
+  --color-on-tertiary-fixed: #001d32;
+  --color-on-tertiary-fixed-variant: #004a75;
+
+  --color-surface: #f9faf2;
+  --color-surface-bright: #f9faf2;
+  --color-surface-dim: #d9dbd3;
+  --color-surface-variant: #e2e3dc;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f4ed;
+  --color-surface-container: #edefe7;
+  --color-surface-container-high: #e7e9e1;
+  --color-surface-container-highest: #e2e3dc;
+  --color-surface-tint: #3b6934;
+
+  --color-on-surface: #191c18;
+  --color-on-surface-variant: #42493e;
+  --color-on-background: #191c18;
+  --color-background: #f9faf2;
+  --color-inverse-surface: #2e312c;
+  --color-inverse-on-surface: #f0f1ea;
+
+  --color-outline: #72796e;
+  --color-outline-variant: #c2c9bb;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  /* Fonts */
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Work Sans", sans-serif;
+  --font-label: "Work Sans", sans-serif;
+
+  /* Border radius */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: #0f2410; /* outer shell — page divs override with #f9faf2 */
+  color: #191c18;
+  font-family: "Work Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
+.glass-panel {
+  background: rgba(249, 250, 242, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
