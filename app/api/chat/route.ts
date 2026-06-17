@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
 const SYSTEM_PROMPT = `You are Rythu Mitra, an expert AI agronomist for Elan Agrochem's farmer platform.
 You help Indian farmers with:
@@ -15,40 +16,38 @@ If the farmer describes symptoms, suggest they use the Diagnose feature to uploa
 export async function POST(req: NextRequest) {
   const { messages } = await req.json();
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { reply: "AI assistant is not configured. Please add ANTHROPIC_API_KEY to your environment." },
+      { reply: "AI assistant is not configured. Please add GEMINI_API_KEY to your environment." },
       { status: 200 }
     );
   }
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 512,
-      system: SYSTEM_PROMPT,
-      messages: messages.map((m: { role: string; content: string }) => ({
-        role: m.role,
-        content: m.content,
-      })),
-    }),
-  });
+  try {
+    const ai = new GoogleGenAI({ apiKey });
 
-  if (!response.ok) {
+    // Convert messages to Gemini format; exclude the last user message — it goes as the prompt
+    const history = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    const lastMessage = messages[messages.length - 1];
+
+    const chat = ai.chats.create({
+      model: "gemini-2.0-flash",
+      config: { systemInstruction: SYSTEM_PROMPT, maxOutputTokens: 512 },
+      history,
+    });
+
+    const response = await chat.sendMessage({ message: lastMessage.content });
+    const reply = response.text ?? "I couldn't generate a response. Please try again.";
+    return NextResponse.json({ reply });
+  } catch {
     return NextResponse.json(
       { reply: "I'm having trouble connecting right now. Please try again shortly." },
       { status: 200 }
     );
   }
-
-  const data = await response.json();
-  const reply = data.content?.[0]?.text ?? "I couldn't generate a response. Please try again.";
-  return NextResponse.json({ reply });
 }

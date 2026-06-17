@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
 const ELAN_PRODUCTS: Record<string, { name: string; price: string; tag: string }[]> = {
   fungal:    [{ name: "Elan Copper XL", price: "₹850", tag: "TOP RATED" }, { name: "Elan Pure Neem Oil", price: "₹420", tag: "ORGANIC" }],
@@ -27,9 +28,9 @@ Analyze crop images and return ONLY valid JSON with this exact structure:
 Return ONLY the JSON object, no markdown, no explanation.`;
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
+    return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
   }
 
   const { imageBase64, mediaType } = await req.json();
@@ -37,50 +38,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No image provided" }, { status: 400 });
   }
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      system: SYSTEM,
-      messages: [{
-        role: "user",
-        content: [
-          {
-            type: "image",
-            source: { type: "base64", media_type: mediaType ?? "image/jpeg", data: imageBase64 },
-          },
-          {
-            type: "text",
-            text: "Analyze this crop image and return the JSON diagnosis.",
-          },
-        ],
-      }],
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.text();
-    return NextResponse.json({ error: "Claude API error", detail: err }, { status: 502 });
-  }
-
-  const data = await response.json();
-  const raw = data.content?.[0]?.text ?? "{}";
-
-  let diagnosis: Record<string, unknown>;
   try {
-    diagnosis = JSON.parse(raw);
-  } catch {
-    return NextResponse.json({ error: "Failed to parse diagnosis JSON", raw }, { status: 502 });
+    const ai = new GoogleGenAI({ apiKey });
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      config: { systemInstruction: SYSTEM, maxOutputTokens: 1024 },
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { inlineData: { mimeType: mediaType ?? "image/jpeg", data: imageBase64 } },
+            { text: "Analyze this crop image and return the JSON diagnosis." },
+          ],
+        },
+      ],
+    });
+
+    const raw = response.text ?? "{}";
+    // Strip markdown code fences if Gemini wraps the JSON
+    const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+
+    let diagnosis: Record<string, unknown>;
+    try {
+      diagnosis = JSON.parse(cleaned);
+    } catch {
+      return NextResponse.json({ error: "Failed to parse diagnosis JSON", raw }, { status: 502 });
+    }
+
+    const category = (diagnosis.category as string) ?? "healthy";
+    const products = ELAN_PRODUCTS[category] ?? ELAN_PRODUCTS.healthy;
+
+    return NextResponse.json({ ...diagnosis, products });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Gemini API error";
+    return NextResponse.json({ error: message }, { status: 502 });
   }
-
-  const category = (diagnosis.category as string) ?? "healthy";
-  const products = ELAN_PRODUCTS[category] ?? ELAN_PRODUCTS.healthy;
-
-  return NextResponse.json({ ...diagnosis, products });
 }
