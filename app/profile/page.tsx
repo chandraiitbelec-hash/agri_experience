@@ -31,7 +31,7 @@ export default function ProfilePage() {
     <div className="bg-[#f9faf2] font-['Work_Sans'] text-[#191c18]">
       <AppHeader />
 
-      <main className="pt-6 pb-32 px-6 max-w-5xl mx-auto">
+      <main className="pt-8 pb-40 px-6 max-w-5xl mx-auto space-y-6">
         {/* Profile Card */}
         <section className="flex flex-col gap-6">
           <div className="bg-white rounded-xl p-8 flex flex-col items-center gap-8 shadow-[0_12px_32px_rgba(25,28,24,0.02)]">
