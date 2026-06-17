@@ -34,7 +34,10 @@ export async function GET(req: NextRequest) {
     `&timezone=Asia%2FKolkata&forecast_days=5`;
 
   const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) return NextResponse.json({ error: "Weather fetch failed" }, { status: 502 });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    return NextResponse.json({ error: "Weather fetch failed", status: res.status, detail: text }, { status: 502 });
+  }
 
   const data = await res.json();
   const cur   = data.current;
