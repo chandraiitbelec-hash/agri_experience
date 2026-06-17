@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
 
 const SYSTEM_PROMPT = `You are Rythu Mitra, an expert AI agronomist for Elan Agrochem's farmer platform.
 You help Indian farmers with:
@@ -24,30 +23,32 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  try {
-    const ai = new GoogleGenAI({ apiKey });
+  const contents = messages.map((m: { role: string; content: string }) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
 
-    // Convert messages to Gemini format; exclude the last user message — it goes as the prompt
-    const history = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents,
+        generationConfig: { maxOutputTokens: 512 },
+      }),
+    }
+  );
 
-    const lastMessage = messages[messages.length - 1];
-
-    const chat = ai.chats.create({
-      model: "gemini-2.0-flash",
-      config: { systemInstruction: SYSTEM_PROMPT, maxOutputTokens: 512 },
-      history,
-    });
-
-    const response = await chat.sendMessage({ message: lastMessage.content });
-    const reply = response.text ?? "I couldn't generate a response. Please try again.";
-    return NextResponse.json({ reply });
-  } catch {
+  if (!response.ok) {
     return NextResponse.json(
       { reply: "I'm having trouble connecting right now. Please try again shortly." },
       { status: 200 }
     );
   }
+
+  const data = await response.json();
+  const reply = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "I couldn't generate a response. Please try again.";
+  return NextResponse.json({ reply });
 }

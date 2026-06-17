@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
 
 const ELAN_PRODUCTS: Record<string, { name: string; price: string; tag: string }[]> = {
   fungal:    [{ name: "Elan Copper XL", price: "₹850", tag: "TOP RATED" }, { name: "Elan Pure Neem Oil", price: "₹420", tag: "ORGANIC" }],
@@ -38,44 +37,46 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No image provided" }, { status: 400 });
   }
 
-  try {
-    const ai = new GoogleGenAI({ apiKey });
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      config: {
-        systemInstruction: SYSTEM,
-        maxOutputTokens: 2048,
-        thinkingConfig: { thinkingBudget: 0 },
-      },
-      contents: [
-        {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM }] },
+        contents: [{
           role: "user",
           parts: [
-            { inlineData: { mimeType: mediaType ?? "image/jpeg", data: imageBase64 } },
+            { inline_data: { mime_type: mediaType ?? "image/jpeg", data: imageBase64 } },
             { text: "Analyze this crop image and return the JSON diagnosis." },
           ],
+        }],
+        generationConfig: {
+          maxOutputTokens: 2048,
+          thinkingConfig: { thinkingBudget: 0 },
         },
-      ],
-    });
-
-    const raw = response.text ?? "{}";
-    // Strip markdown code fences if Gemini wraps the JSON
-    const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
-
-    let diagnosis: Record<string, unknown>;
-    try {
-      diagnosis = JSON.parse(cleaned);
-    } catch {
-      return NextResponse.json({ error: "Failed to parse diagnosis JSON", raw }, { status: 502 });
+      }),
     }
+  );
 
-    const category = (diagnosis.category as string) ?? "healthy";
-    const products = ELAN_PRODUCTS[category] ?? ELAN_PRODUCTS.healthy;
-
-    return NextResponse.json({ ...diagnosis, products });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Gemini API error";
-    return NextResponse.json({ error: message }, { status: 502 });
+  if (!response.ok) {
+    const err = await response.text();
+    return NextResponse.json({ error: "Gemini API error", detail: err }, { status: 502 });
   }
+
+  const data = await response.json();
+  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+  const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/,"").trim();
+
+  let diagnosis: Record<string, unknown>;
+  try {
+    diagnosis = JSON.parse(cleaned);
+  } catch {
+    return NextResponse.json({ error: "Failed to parse diagnosis JSON", raw }, { status: 502 });
+  }
+
+  const category = (diagnosis.category as string) ?? "healthy";
+  const products = ELAN_PRODUCTS[category] ?? ELAN_PRODUCTS.healthy;
+
+  return NextResponse.json({ ...diagnosis, products });
 }
