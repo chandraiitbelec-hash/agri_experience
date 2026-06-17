@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     `&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max` +
     `&timezone=Asia%2FKolkata&forecast_days=5`;
 
-  const res = await fetch(url, { next: { revalidate: 1800 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return NextResponse.json({ error: "Weather fetch failed" }, { status: 502 });
 
   const data = await res.json();
