@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   }
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -51,10 +51,7 @@ export async function POST(req: NextRequest) {
             { text: "Analyze this crop image and return the JSON diagnosis." },
           ],
         }],
-        generationConfig: {
-          maxOutputTokens: 2048,
-          thinkingConfig: { thinkingBudget: 0 },
-        },
+        generationConfig: { maxOutputTokens: 2048 },
       }),
     }
   );
