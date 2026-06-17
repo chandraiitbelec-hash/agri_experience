@@ -1,6 +1,7 @@
 import BottomNav from "@/components/BottomNav";
 import ChatFab from "@/components/ChatFab";
 import Link from "next/link";
+import MarketplaceHeader from "./MarketplaceHeader";
 
 const categories = [
   { icon: "eco", label: "Fertilizers", bg: "bg-[#2d5a27]", href: "/marketplace/fertilizers" },
@@ -58,27 +59,7 @@ const products = [
 export default function Marketplace() {
   return (
     <div className="bg-[#f9faf2] font-['Work_Sans'] text-[#191c18]">
-      <header className="sticky top-0 w-full z-[50] flex items-center justify-between px-6 h-16 bg-[#f9faf2]">
-        <div className="flex items-center gap-4">
-          <button className="p-2 rounded-full hover:bg-[#e2e3dc] transition-colors active:scale-90">
-            <span className="material-symbols-outlined text-[#154212]">menu</span>
-          </button>
-          <h1 className="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-[#154212]">
-            Rythu Mitra
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/checkout" className="relative p-2 rounded-full hover:bg-[#e2e3dc] transition-colors">
-            <span className="material-symbols-outlined text-[#154212]">shopping_cart</span>
-            <span className="absolute top-1 right-1 w-4 h-4 bg-[#154212] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-              2
-            </span>
-          </Link>
-          <button className="p-2 rounded-full hover:bg-[#e2e3dc] transition-colors">
-            <span className="material-symbols-outlined text-[#154212]">notifications</span>
-          </button>
-        </div>
-      </header>
+      <MarketplaceHeader />
 
       <main className="pt-20 pb-32 px-6 max-w-5xl mx-auto">
         {/* Search & Hero */}
