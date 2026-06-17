@@ -181,7 +181,7 @@ export default async function SolutionsPage({
               View All Shop
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {solutions.map((p) => (
               <div
                 key={p.id}
