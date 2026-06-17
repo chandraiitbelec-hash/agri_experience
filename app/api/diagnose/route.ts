@@ -43,7 +43,11 @@ export async function POST(req: NextRequest) {
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      config: { systemInstruction: SYSTEM, maxOutputTokens: 1024 },
+      config: {
+        systemInstruction: SYSTEM,
+        maxOutputTokens: 2048,
+        thinkingConfig: { thinkingBudget: 0 },
+      },
       contents: [
         {
           role: "user",
