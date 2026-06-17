@@ -21,13 +21,22 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url);
-  const lat  = searchParams.get("lat")  ?? "14.48";
-  const lon  = searchParams.get("lon")  ?? "78.82";
-  const name = searchParams.get("name") ?? "Kadapa, AP";
+  const lat  = searchParams.get("lat");
+  const lon  = searchParams.get("lon");
+  const city = searchParams.get("city");
+  const name = searchParams.get("name") ?? city ?? "Unknown";
+
+  if (!lat && !lon && !city) {
+    return NextResponse.json({ error: "Provide lat & lon or city param" }, { status: 400 });
+  }
+
+  const locationQuery = lat && lon
+    ? `lat=${lat}&lon=${lon}`
+    : `q=${encodeURIComponent(city!)}`;
 
   const [currentRes, forecastRes] = await Promise.all([
-    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`, { cache: "no-store" }),
-    fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&cnt=40&appid=${apiKey}`, { cache: "no-store" }),
+    fetch(`https://api.openweathermap.org/data/2.5/weather?${locationQuery}&units=metric&appid=${apiKey}`, { cache: "no-store" }),
+    fetch(`https://api.openweathermap.org/data/2.5/forecast?${locationQuery}&units=metric&cnt=40&appid=${apiKey}`, { cache: "no-store" }),
   ]);
 
   if (!currentRes.ok || !forecastRes.ok) {
