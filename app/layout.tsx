@@ -60,7 +60,7 @@ export default function RootLayout({
           </div>
 
           {/* Mobile frame — fixed height, independent scroll, contains all positioned children */}
-          <div className="relative w-full md:max-w-[390px] md:h-screen md:shadow-[0_0_80px_rgba(0,0,0,0.5)] md:overflow-y-auto md:overflow-x-hidden">
+          <div className="relative w-full md:max-w-[390px] md:h-[calc(100vh-2rem)] md:my-4 md:rounded-[2rem] md:shadow-[0_0_80px_rgba(0,0,0,0.5)] md:overflow-y-auto md:overflow-x-hidden">
             <CartProvider>{children}</CartProvider>
           </div>
 
