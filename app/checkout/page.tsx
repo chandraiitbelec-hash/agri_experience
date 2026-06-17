@@ -11,6 +11,8 @@ export default function CheckoutPage() {
   const { items, remove, increment, decrement, total } = useCart();
   const [payment, setPayment] = useState<"upi" | "cod" | "bank">("upi");
   const [paid, setPaid] = useState(false);
+  const [changingAddress, setChangingAddress] = useState(false);
+  const [address, setAddress] = useState("Pedakurapadu, Guntur, AP — 522 601");
 
   const gst = total * GST_RATE;
   const grandTotal = total + gst + (items.length > 0 ? DELIVERY_FEE : 0);
@@ -97,16 +99,34 @@ export default function CheckoutPage() {
 
             {/* Delivery */}
             <div className="bg-white rounded-[1.5rem] p-5 shadow-[0_4px_12px_rgba(25,28,24,0.04)]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[#154212]">location_on</span>
-                  <div>
-                    <p className="font-bold text-sm">Delivery Address</p>
-                    <p className="text-xs text-[#42493e]">Pedakurapadu, Guntur, AP — 522 601</p>
-                  </div>
+              {changingAddress ? (
+                <div className="space-y-3">
+                  <p className="font-bold text-sm text-[#191c18]">Enter Delivery Address</p>
+                  <textarea
+                    className="w-full bg-[#f3f4ed] rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#154212] resize-none"
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                  <button
+                    onClick={() => setChangingAddress(false)}
+                    className="w-full bg-[#154212] text-white font-bold py-3 rounded-xl hover:bg-[#2d5a27] transition-colors"
+                  >
+                    Save Address
+                  </button>
                 </div>
-                <button className="text-[#154212] text-sm font-bold hover:underline">Change</button>
-              </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[#154212]">location_on</span>
+                    <div>
+                      <p className="font-bold text-sm">Delivery Address</p>
+                      <p className="text-xs text-[#42493e]">{address}</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setChangingAddress(true)} className="text-[#154212] text-sm font-bold hover:underline">Change</button>
+                </div>
+              )}
             </div>
 
             {/* Payment */}

@@ -5,6 +5,8 @@ import ChatFab from "@/components/ChatFab";
 import AppHeader from "@/components/AppHeader";
 import OrderSheet from "@/components/OrderSheet";
 
+type Sheet = "notifications" | "language" | "logout" | "fields" | null;
+
 const crops = [
   { icon: "grass",     iconClass: "text-[#154212]", border: "border-[#154212]", name: "Paddy Rice", acres: "8.2 Acres" },
   { icon: "eco",       iconClass: "text-[#755750]", border: "border-[#755750]", name: "Cotton",     acres: "6.5 Acres" },
@@ -21,6 +23,9 @@ type Order = typeof orders[0];
 
 export default function ProfilePage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [sheet, setSheet] = useState<Sheet>(null);
+  const [notifications, setNotifications] = useState({ weather: true, orders: true, promos: false });
+  const [language, setLanguage] = useState<"en" | "te">("en");
 
   return (
     <div className="bg-[#f9faf2] font-['Work_Sans'] text-[#191c18]">
@@ -70,7 +75,7 @@ export default function ProfilePage() {
         <section className="mt-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#154212]">Crops Grown</h2>
-            <button className="text-[#154212] font-semibold text-sm hover:underline">Manage Fields</button>
+            <button onClick={() => setSheet("fields")} className="text-[#154212] font-semibold text-sm hover:underline">Manage Fields</button>
           </div>
           <div className="space-y-4">
             {crops.map((c) => (
@@ -129,12 +134,12 @@ export default function ProfilePage() {
         {/* Settings */}
         <section className="mt-12 bg-white rounded-xl p-6 shadow-[0_4px_12px_rgba(25,28,24,0.02)] space-y-1">
           {[
-            { icon: "notifications", label: "Notifications" },
-            { icon: "language",      label: "Language (Telugu / English)" },
-            { icon: "help_outline",  label: "Help & Support" },
-            { icon: "logout",        label: "Log Out", danger: true },
+            { icon: "notifications", label: "Notifications",              onClick: () => setSheet("notifications") },
+            { icon: "language",      label: "Language (Telugu / English)", onClick: () => setSheet("language") },
+            { icon: "help_outline",  label: "Help & Support",              onClick: () => window.open("mailto:support@elanagrochem.com") },
+            { icon: "logout",        label: "Log Out", danger: true,       onClick: () => setSheet("logout") },
           ].map((item) => (
-            <button key={item.label} className={`w-full flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3f4ed] transition-colors text-left ${item.danger ? "text-[#ba1a1a]" : "text-[#191c18]"}`}>
+            <button key={item.label} onClick={item.onClick} className={`w-full flex items-center gap-4 p-4 rounded-xl hover:bg-[#f3f4ed] transition-colors text-left ${item.danger ? "text-[#ba1a1a]" : "text-[#191c18]"}`}>
               <span className={`material-symbols-outlined ${item.danger ? "text-[#ba1a1a]" : "text-[#154212]"}`}>{item.icon}</span>
               <span className="font-medium">{item.label}</span>
               {!item.danger && <span className="material-symbols-outlined text-[#72796e] ml-auto">chevron_right</span>}
@@ -144,6 +149,105 @@ export default function ProfilePage() {
       </main>
 
       <OrderSheet order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+
+      {/* Bottom sheets */}
+      {sheet && (
+        <>
+          <div className="fixed inset-0 z-[100] bg-black/50" onClick={() => setSheet(null)} />
+          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[110] w-full max-w-[390px] bg-[#f9faf2] rounded-t-[2rem] shadow-2xl">
+            <div className="flex justify-center pt-4 pb-2"><div className="w-10 h-1 rounded-full bg-[#c2c9bb]" /></div>
+
+            {/* Notifications */}
+            {sheet === "notifications" && (
+              <div className="px-6 pb-10">
+                <h2 className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#154212] mb-6">Notifications</h2>
+                <div className="space-y-4">
+                  {([
+                    { key: "weather", label: "Weather Alerts",    desc: "Rain and extreme weather warnings" },
+                    { key: "orders",  label: "Order Updates",     desc: "Delivery and dispatch status" },
+                    { key: "promos",  label: "Elan Offers",       desc: "Deals and seasonal promotions" },
+                  ] as const).map((n) => (
+                    <div key={n.key} className="bg-white rounded-xl p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-[#191c18]">{n.label}</p>
+                        <p className="text-xs text-[#42493e]">{n.desc}</p>
+                      </div>
+                      <button
+                        onClick={() => setNotifications((prev) => ({ ...prev, [n.key]: !prev[n.key] }))}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${notifications[n.key] ? "bg-[#154212]" : "bg-[#c2c9bb]"}`}
+                      >
+                        <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${notifications[n.key] ? "right-1" : "left-1"}`} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => setSheet(null)} className="mt-6 w-full bg-[#154212] text-white font-bold py-4 rounded-[1.5rem]">Done</button>
+              </div>
+            )}
+
+            {/* Language */}
+            {sheet === "language" && (
+              <div className="px-6 pb-10">
+                <h2 className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#154212] mb-6">Language</h2>
+                <div className="space-y-3">
+                  {([{ id: "en", label: "English", native: "English" }, { id: "te", label: "Telugu", native: "తెలుగు" }] as const).map((l) => (
+                    <button key={l.id} onClick={() => setLanguage(l.id)}
+                      className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${language === l.id ? "border-[#154212] bg-[#154212]/5" : "border-[#e2e3dc] bg-white"}`}>
+                      <div className="text-left">
+                        <p className={`font-bold ${language === l.id ? "text-[#154212]" : "text-[#191c18]"}`}>{l.label}</p>
+                        <p className="text-sm text-[#42493e]">{l.native}</p>
+                      </div>
+                      {language === l.id && <span className="material-symbols-outlined text-[#154212]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={() => setSheet(null)} className="mt-6 w-full bg-[#154212] text-white font-bold py-4 rounded-[1.5rem]">Save</button>
+              </div>
+            )}
+
+            {/* Logout */}
+            {sheet === "logout" && (
+              <div className="px-6 pb-10 text-center">
+                <div className="w-16 h-16 rounded-full bg-[#ffdad6] flex items-center justify-center mx-auto mt-4 mb-4">
+                  <span className="material-symbols-outlined text-[#ba1a1a] text-3xl">logout</span>
+                </div>
+                <h2 className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#191c18] mb-2">Log Out?</h2>
+                <p className="text-[#42493e] text-sm mb-8">You'll need to sign in again to access your farm data and orders.</p>
+                <button onClick={() => setSheet(null)} className="w-full bg-[#ba1a1a] text-white font-bold py-4 rounded-[1.5rem] mb-3 hover:bg-[#93000a] transition-colors">
+                  Yes, Log Out
+                </button>
+                <button onClick={() => setSheet(null)} className="w-full text-[#154212] font-bold py-3">Cancel</button>
+              </div>
+            )}
+
+            {/* Manage Fields */}
+            {sheet === "fields" && (
+              <div className="px-6 pb-10">
+                <h2 className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#154212] mb-6">Manage Fields</h2>
+                <div className="space-y-3">
+                  {crops.map((c) => (
+                    <div key={c.name} className={`bg-white rounded-xl p-4 flex items-center gap-4 border-l-4 ${c.border}`}>
+                      <span className={`material-symbols-outlined ${c.iconClass}`}>{c.icon}</span>
+                      <div className="flex-1">
+                        <p className="font-bold text-[#191c18]">{c.name}</p>
+                        <p className="text-xs text-[#42493e]">{c.acres}</p>
+                      </div>
+                      <button className="text-[#42493e] hover:text-[#154212] transition-colors">
+                        <span className="material-symbols-outlined">edit</span>
+                      </button>
+                    </div>
+                  ))}
+                  <button className="w-full border-2 border-dashed border-[#c2c9bb] rounded-xl p-4 flex items-center justify-center gap-2 text-[#42493e] hover:border-[#154212] hover:text-[#154212] transition-colors">
+                    <span className="material-symbols-outlined">add</span>
+                    <span className="font-medium">Add New Field</span>
+                  </button>
+                </div>
+                <button onClick={() => setSheet(null)} className="mt-6 w-full bg-[#154212] text-white font-bold py-4 rounded-[1.5rem]">Done</button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
       <ChatFab />
       <BottomNav />
     </div>
