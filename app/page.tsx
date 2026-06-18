@@ -3,6 +3,7 @@ import BottomNav from "@/components/BottomNav";
 import ChatFab from "@/components/ChatFab";
 import WeatherWidget from "@/components/WeatherWidget";
 import AppHeader from "@/components/AppHeader";
+import NewsWidget from "@/components/NewsWidget";
 
 export default function Home() {
   return (
@@ -35,6 +36,15 @@ export default function Home() {
               </p>
             </div>
           </div>
+        </section>
+
+        {/* News Feed */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-['Plus_Jakarta_Sans'] text-2xl text-[#154212] font-bold">Agri News</h2>
+            <span className="text-xs text-[#42493e] uppercase tracking-wider">Live Feed</span>
+          </div>
+          <NewsWidget />
         </section>
 
         {/* Elan Banner */}
