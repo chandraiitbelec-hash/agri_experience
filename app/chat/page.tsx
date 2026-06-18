@@ -1,7 +1,6 @@
 "use client";
 import BottomNav from "@/components/BottomNav";
 import { useState, useRef, useEffect } from "react";
-import Drawer from "@/components/Drawer";
 import Link from "next/link";
 
 interface Message {
@@ -20,7 +19,6 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -58,16 +56,9 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-full min-h-screen bg-[#f9faf2] font-['Work_Sans'] text-[#191c18]">
-      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-
       {/* Header */}
-      <header className="sticky top-0 w-full z-[50] flex items-center justify-between px-6 h-16 bg-[#f9faf2] shrink-0">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setDrawerOpen(true)} className="p-2 text-[#154212] hover:bg-[#e2e3dc] rounded-full transition-colors active:scale-90">
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-          <h1 className="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-[#154212]">Rythu Mitra</h1>
-        </div>
+      <header className="sticky top-0 w-full z-[50] flex items-center justify-between px-6 h-14 bg-[#f9faf2] shrink-0">
+        <h1 className="font-['Plus_Jakarta_Sans'] font-black text-xl text-[#154212] tracking-tight">Rythu Mitra</h1>
         <Link href="/profile">
           <div className="w-8 h-8 rounded-full bg-[#2d5a27] overflow-hidden">
             <img className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="Profile" />
